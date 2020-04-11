@@ -1,4 +1,6 @@
-require "denormalized/core"
+# frozen_string_literal: true
+
+require 'denormalized/core'
 
 module Denormalized
   def denormalized?
@@ -8,8 +10,12 @@ module Denormalized
   def denormalized(*attributes)
     options = attributes.extract_options!.dup
 
-    raise ArgumentError, "You need to supply at least one column" if attributes.empty?
-    raise ArgumentError, "You need to supply at least one table" if options.empty? || options[:tables]&.empty?
+    if attributes.empty?
+      raise ArgumentError, 'You need to supply at least one column'
+    end
+    if options.empty? || options[:tables]&.empty?
+      raise ArgumentError, 'You need to supply at least one table'
+    end
 
     class_attribute :denormalized_configuration
 

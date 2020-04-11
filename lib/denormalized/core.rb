@@ -8,22 +8,24 @@ module Denormalized
 
     def denormalized_attribute?(name)
       name = name.to_sym if attributes.is_a?(String)
-      
+
       return denormalized_configuration.columns_hash[name] if name.is_a?(Symbol)
 
-      Rails.logger.warn "[DENORMALIZED]: Syboml expected, instead received " + name.class.to_s
+      Rails.logger.warn '[DENORMALIZED]: Syboml expected, instead received ' + name.class.to_s
       false
     end
 
     module ClassMethods
       def contains_denormalized_attributes(attributes)
-        attributes.keys.any? { |name| Denormalized::Core.denormalized_attribute?(name) }
+        attributes.keys.any? do |name|
+          Denormalized::Core.denormalized_attribute?(name)
+        end
       end
 
       def extract_existing_denormalized_attributes(new_attributes)
         {}.tap do |extracted_attributes|
           (columns & new_attributes.keys).each do |attribute|
-            extracted_attributes[attribute] = self.read_attribute(attribute)
+            extracted_attributes[attribute] = read_attribute(attribute)
           end
         end
       end
@@ -41,7 +43,7 @@ module Denormalized
           denormalized_configuration.tables.each do |table|
             table.classify
                  .constantize
-                 .where([attr_name]: self.read_attribute(attr_name))
+                 .where(attr_name => read_attribute(attr_name))
                  .each { |obj| obj.write_attribute(attr_name, value) }
           end
         end
@@ -54,7 +56,7 @@ module Denormalized
           denormalized_configuration.tables.each do |table|
             table.classify
                  .constantize
-                 .where([name]: self.read_attribute(name))
+                 .where(name => read_attribute(name))
                  .each { |obj| obj.update_attribute(name, value) }
           end
         end
@@ -95,7 +97,7 @@ module Denormalized
 
     def update(id, attributes)
       if attributes.keys.any? { |name| Denormalized::Core.denormalized_attribute?(name) }
-        subjects = self.base_class.where(id: id) # we will let super handle errors if subject doesn't exist
+        subjects = base_class.where(id: id) # we will let super handle errors if subject doesn't exist
 
         if subjects.any?
           subjects.each do |subject|
@@ -103,9 +105,9 @@ module Denormalized
 
             denormalized_configuration.tables.each do |table|
               table.classify
-                    .constantize
-                    .where(subject.extract_existing_denormalized_attributes(attributes))
-                    .each { |obj| obj.update(gifted_attributes) }
+                   .constantize
+                   .where(subject.extract_existing_denormalized_attributes(attributes))
+                   .each { |obj| obj.update(gifted_attributes) }
             end
           end
         end
