@@ -56,7 +56,7 @@ module Denormalized
     def update_attribute(name, value)
       if self.class.denormalized_attribute?(attr_name)
         denormalized_configuration[:tables].each do |table|
-          denormalized_action(
+          denormalized_subjects(
             table: table,
             where_attrs: { name => read_attribute(name) }
           ).each { |obj| obj.send(:update_attribute, name, value) }
@@ -71,7 +71,7 @@ module Denormalized
         gifted_attributes = extract_denormalized_attributes(new_attributes)
 
         denormalized_configuration[:tables].each do |table|
-          denormalized_action(
+          denormalized_subjects(
             table: table,
             where_attrs: extract_existing_denormalized_attributes(new_attributes)
           ).each { |obj| obj.send(:assign_attributes, gifted_attributes) }
@@ -86,7 +86,7 @@ module Denormalized
         gifted_attributes = extract_denormalized_attributes(attributes)
 
         denormalized_configuration[:tables].each do |table|
-          denormalized_action(
+          denormalized_subjects(
             table: table,
             where_attrs: extract_existing_denormalized_attributes(attributes)
           ).each { |obj| obj.send(:update_columns, gifted_attributes) }
