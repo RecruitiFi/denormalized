@@ -89,7 +89,7 @@ module Denormalized
         name = name.to_sym if name.is_a?(String)
 
         if name.is_a?(Symbol)
-          return denormalized_configuration.columns_hash[name]
+          return denormalized_configuration[:columns_hash][name]
         end
 
         Rails.logger.warn '[DENORMALIZED]: Syboml expected, instead received ' + name.class.to_s
