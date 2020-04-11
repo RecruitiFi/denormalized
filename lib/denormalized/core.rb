@@ -14,7 +14,7 @@ module Denormalized
 
     def extract_existing_denormalized_attributes(new_attributes)
       {}.tap do |extracted_attributes|
-        (columns & new_attributes.keys).each do |attribute|
+        (denormalized_configuration[:columns] & new_attributes.keys).each do |attribute|
           extracted_attributes[attribute] = read_attribute(attribute)
         end
       end
@@ -22,7 +22,7 @@ module Denormalized
 
     def extract_denormalized_attributes(new_attributes)
       {}.tap do |extracted_attributes|
-        (columns & new_attributes.keys).each do |attribute|
+        (denormalized_configuration[:columns] & new_attributes.keys).each do |attribute|
           extracted_attributes[attribute] = new_attributes[attribute]
         end
       end
@@ -30,7 +30,7 @@ module Denormalized
 
     def write_attribute(attr_name, value)
       if self.class.denormalized_attribute?(attr_name)
-        denormalized_configuration.tables.each do |table|
+        denormalized_configuration[:tables].each do |table|
           table.classify
                .constantize
                .where(attr_name => read_attribute(attr_name))
@@ -43,7 +43,7 @@ module Denormalized
 
     def update_attribute(name, value)
       if self.class.denormalized_attribute?(attr_name)
-        denormalized_configuration.tables.each do |table|
+        denormalized_configuration[:tables].each do |table|
           table.classify
                .constantize
                .where(name => read_attribute(name))
@@ -58,7 +58,7 @@ module Denormalized
       if contains_denormalized_attributes(new_attributes)
         gifted_attributes = extract_denormalized_attributes(new_attributes)
 
-        denormalized_configuration.tables.each do |table|
+        denormalized_configuration[:tables].each do |table|
           table.classify
                .constantize
                .where(extract_existing_denormalized_attributes(new_attributes))
@@ -73,7 +73,7 @@ module Denormalized
       if contains_denormalized_attributes(attributes)
         gifted_attributes = extract_denormalized_attributes(attributes)
 
-        denormalized_configuration.tables.each do |table|
+        denormalized_configuration[:tables].each do |table|
           table.classify
                .constantize
                .where(extract_existing_denormalized_attributes(attributes))
@@ -104,7 +104,7 @@ module Denormalized
             subjects.each do |subject|
               gifted_attributes = subject.extract_denormalized_attributes(attributes)
 
-              denormalized_configuration.tables.each do |table|
+              denormalized_configuration[:tables].each do |table|
                 table.classify
                      .constantize
                      .where(subject.extract_existing_denormalized_attributes(attributes))
