@@ -15,10 +15,7 @@ module Denormalized
         table
       ).where(
         where_attrs
-      ).send(
-        method,
-        args
-      )
+      ).each { |obj| obj.send(method,args) }
     end
 
     def contains_denormalized_attributes(attributes)
