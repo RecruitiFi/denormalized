@@ -66,6 +66,21 @@ module Denormalized
       super
     end
 
+    def update(attributes)
+      if contains_denormalized_attributes(attributes)
+        gifted_attributes = extract_denormalized_attributes(attributes)
+
+        denormalized_configuration[:tables].each do |table|
+          denormalized_subjects(
+            table: table,
+            where_attrs: extract_existing_denormalized_attributes(attributes)
+          ).each { |obj| obj.update(gifted_attributes) }
+        end
+      end
+
+      super
+    end
+
     def assign_attributes(new_attributes)
       if contains_denormalized_attributes(new_attributes)
         gifted_attributes = extract_denormalized_attributes(new_attributes)
@@ -74,7 +89,7 @@ module Denormalized
           denormalized_subjects(
             table: table,
             where_attrs: extract_existing_denormalized_attributes(new_attributes)
-          ).each { |obj| obj.send(:assign_attributes, gifted_attributes) }
+          ).each { |obj| obj.assign_attributes(gifted_attributes) }
         end
       end
 
