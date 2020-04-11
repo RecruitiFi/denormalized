@@ -8,7 +8,7 @@ module Denormalized
 
     def contains_denormalized_attributes(attributes)
       attributes.keys.any? do |name|
-        base_class.denormalized_attribute?(name)
+        self.class.denormalized_attribute?(name)
       end
     end
 
@@ -29,12 +29,12 @@ module Denormalized
     end
 
     def write_attribute(attr_name, value)
-      if base_class.denormalized_attribute?(attr_name)
+      if self.class.denormalized_attribute?(attr_name)
         denormalized_configuration.tables.each do |table|
           table.classify
-                .constantize
-                .where(attr_name => read_attribute(attr_name))
-                .each { |obj| obj.write_attribute(attr_name, value) }
+               .constantize
+               .where(attr_name => read_attribute(attr_name))
+               .each { |obj| obj.write_attribute(attr_name, value) }
         end
       end
 
@@ -42,12 +42,12 @@ module Denormalized
     end
 
     def update_attribute(name, value)
-      if base_class.denormalized_attribute?(attr_name)
+      if self.class.denormalized_attribute?(attr_name)
         denormalized_configuration.tables.each do |table|
           table.classify
-                .constantize
-                .where(name => read_attribute(name))
-                .each { |obj| obj.update_attribute(name, value) }
+               .constantize
+               .where(name => read_attribute(name))
+               .each { |obj| obj.update_attribute(name, value) }
         end
       end
 
@@ -60,9 +60,9 @@ module Denormalized
 
         denormalized_configuration.tables.each do |table|
           table.classify
-                .constantize
-                .where(extract_existing_denormalized_attributes(new_attributes))
-                .each { |obj| obj.assign_attributes(gifted_attributes) }
+               .constantize
+               .where(extract_existing_denormalized_attributes(new_attributes))
+               .each { |obj| obj.assign_attributes(gifted_attributes) }
         end
       end
 
@@ -75,9 +75,9 @@ module Denormalized
 
         denormalized_configuration.tables.each do |table|
           table.classify
-                .constantize
-                .where(extract_existing_denormalized_attributes(attributes))
-                .each { |obj| obj.update_columns(gifted_attributes) }
+               .constantize
+               .where(extract_existing_denormalized_attributes(attributes))
+               .each { |obj| obj.update_columns(gifted_attributes) }
         end
       end
 
@@ -88,7 +88,9 @@ module Denormalized
       def denormalized_attribute?(name)
         name = name.to_sym if name.is_a?(String)
 
-        return denormalized_configuration.columns_hash[name] if name.is_a?(Symbol)
+        if name.is_a?(Symbol)
+          return denormalized_configuration.columns_hash[name]
+        end
 
         Rails.logger.warn '[DENORMALIZED]: Syboml expected, instead received ' + name.class.to_s
         false
@@ -104,9 +106,9 @@ module Denormalized
 
               denormalized_configuration.tables.each do |table|
                 table.classify
-                    .constantize
-                    .where(subject.extract_existing_denormalized_attributes(attributes))
-                    .each { |obj| obj.update(gifted_attributes) }
+                     .constantize
+                     .where(subject.extract_existing_denormalized_attributes(attributes))
+                     .each { |obj| obj.update(gifted_attributes) }
               end
             end
           end
