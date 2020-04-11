@@ -31,7 +31,8 @@ module Denormalized
     def write_attribute(attr_name, value)
       if self.class.denormalized_attribute?(attr_name)
         denormalized_configuration[:tables].each do |table|
-          table.classify
+          table.to_s
+               .classify
                .constantize
                .where(attr_name => read_attribute(attr_name))
                .each { |obj| obj.write_attribute(attr_name, value) }
@@ -44,7 +45,8 @@ module Denormalized
     def update_attribute(name, value)
       if self.class.denormalized_attribute?(attr_name)
         denormalized_configuration[:tables].each do |table|
-          table.classify
+          table.to_s
+               .classify
                .constantize
                .where(name => read_attribute(name))
                .each { |obj| obj.update_attribute(name, value) }
@@ -59,7 +61,8 @@ module Denormalized
         gifted_attributes = extract_denormalized_attributes(new_attributes)
 
         denormalized_configuration[:tables].each do |table|
-          table.classify
+          table.to_s
+               .classify
                .constantize
                .where(extract_existing_denormalized_attributes(new_attributes))
                .each { |obj| obj.assign_attributes(gifted_attributes) }
@@ -74,7 +77,8 @@ module Denormalized
         gifted_attributes = extract_denormalized_attributes(attributes)
 
         denormalized_configuration[:tables].each do |table|
-          table.classify
+          table.to_s
+               .classify
                .constantize
                .where(extract_existing_denormalized_attributes(attributes))
                .each { |obj| obj.update_columns(gifted_attributes) }
