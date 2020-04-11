@@ -6,6 +6,21 @@ module Denormalized
       base.extend ClassMethods
     end
 
+    def denormalized_subject(table)
+      table.to_s.classify.constantize
+    end
+
+    def denormalized_action(table:, where_attrs:, method_name:, args:)
+      denormalized_subject(
+        table
+      ).where(
+        where_attrs
+      ).send(
+        method_name,
+        args
+      )
+    end
+
     def contains_denormalized_attributes(attributes)
       attributes.keys.any? do |name|
         self.class.denormalized_attribute?(name)
@@ -31,11 +46,12 @@ module Denormalized
     def write_attribute(attr_name, value)
       if self.class.denormalized_attribute?(attr_name)
         denormalized_configuration[:tables].each do |table|
-          table.to_s
-               .classify
-               .constantize
-               .where(attr_name => read_attribute(attr_name))
-               .each { |obj| obj.send(:write_attribute, attr_name, value) }
+          denormalized_action(
+            table: table,
+            where_attrs: { attr_name => read_attribute(attr_name) },
+            method: :write_attribute,
+            args: [attr_name, value]
+          )
         end
       end
 
@@ -45,11 +61,12 @@ module Denormalized
     def update_attribute(name, value)
       if self.class.denormalized_attribute?(attr_name)
         denormalized_configuration[:tables].each do |table|
-          table.to_s
-               .classify
-               .constantize
-               .where(name => read_attribute(name))
-               .each { |obj| obj.send(:update_attribute, name, value) }
+          denormalized_action(
+            table: table,
+            where_attrs: { name => read_attribute(name) },
+            method: :update_attribute,
+            args: [name, value]
+          )
         end
       end
 
@@ -61,11 +78,12 @@ module Denormalized
         gifted_attributes = extract_denormalized_attributes(new_attributes)
 
         denormalized_configuration[:tables].each do |table|
-          table.to_s
-               .classify
-               .constantize
-               .where(extract_existing_denormalized_attributes(new_attributes))
-               .each { |obj| obj.send(:assign_attributes, gifted_attributes) }
+          denormalized_action(
+            table: table,
+            where_attrs: extract_existing_denormalized_attributes(new_attributes),
+            method: :assign_attributes,
+            args: gifted_attributes
+          )
         end
       end
 
@@ -77,11 +95,12 @@ module Denormalized
         gifted_attributes = extract_denormalized_attributes(attributes)
 
         denormalized_configuration[:tables].each do |table|
-          table.to_s
-               .classify
-               .constantize
-               .where(extract_existing_denormalized_attributes(attributes))
-               .each { |obj| obj.send(:update_columns, gifted_attributes) }
+          denormalized_action(
+            table: table,
+            where_attrs: extract_existing_denormalized_attributes(attributes),
+            method: :update_columns,
+            args: gifted_attributes
+          )
         end
       end
 
@@ -109,10 +128,12 @@ module Denormalized
               gifted_attributes = subject.extract_denormalized_attributes(attributes)
 
               denormalized_configuration[:tables].each do |table|
-                table.classify
-                     .constantize
-                     .where(subject.extract_existing_denormalized_attributes(attributes))
-                     .each { |obj| obj.update(gifted_attributes) }
+                subject.denormalized_action(
+                  table: table,
+                  where_attrs: subject.extract_existing_denormalized_attributes(attributes),
+                  method: :update,
+                  args: gifted_attributes
+                )
               end
             end
           end
