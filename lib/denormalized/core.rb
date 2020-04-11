@@ -10,13 +10,13 @@ module Denormalized
       table.to_s.classify.constantize
     end
 
-    def denormalized_action(table:, where_attrs:, method_name:, args:)
+    def denormalized_action(table:, where_attrs:, method:, args:)
       denormalized_subject(
         table
       ).where(
         where_attrs
       ).send(
-        method_name,
+        method,
         args
       )
     end
