@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'active_record'
 require 'denormalized/core'
 
 module Denormalized
@@ -28,3 +29,6 @@ module Denormalized
     include Denormalized::Core unless denormalized?
   end
 end
+
+# Extend ActiveRecord's functionality
+ActiveRecord::Base.extend Denormalized

@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['OneNeptune']
   spec.email         = ['michael@michaelbennett.nyc']
 
-  spec.summary       = 'Facilitate simplistic guarding of denormalized' \
+  spec.summary       = 'Facilitate simplistic guarding of denormalized ' \
                        'followers on update of source of truth.'
   spec.homepage      = 'https://github.com/RecruitiFi/denormalized'
   spec.license       = 'MIT'
