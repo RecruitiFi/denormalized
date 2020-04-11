@@ -35,7 +35,7 @@ module Denormalized
                .classify
                .constantize
                .where(attr_name => read_attribute(attr_name))
-               .each { |obj| obj.write_attribute(attr_name, value) }
+               .each { |obj| obj.send(:write_attribute, attr_name, value) }
         end
       end
 
@@ -49,7 +49,7 @@ module Denormalized
                .classify
                .constantize
                .where(name => read_attribute(name))
-               .each { |obj| obj.update_attribute(name, value) }
+               .each { |obj| obj.send(:update_attribute, name, value) }
         end
       end
 
@@ -65,7 +65,7 @@ module Denormalized
                .classify
                .constantize
                .where(extract_existing_denormalized_attributes(new_attributes))
-               .each { |obj| obj.assign_attributes(gifted_attributes) }
+               .each { |obj| obj.send(:assign_attributes, gifted_attributes) }
         end
       end
 
@@ -81,7 +81,7 @@ module Denormalized
                .classify
                .constantize
                .where(extract_existing_denormalized_attributes(attributes))
-               .each { |obj| obj.update_columns(gifted_attributes) }
+               .each { |obj| obj.send(:update_columns, gifted_attributes) }
         end
       end
 
@@ -96,7 +96,7 @@ module Denormalized
           return denormalized_configuration[:columns_hash][name]
         end
 
-        Rails.logger.warn '[DENORMALIZED]: Syboml expected, instead received ' + name.class.to_s
+        Rails.logger.warn '[DENORMALIZED]: Symbol expected, instead received ' + name.class.to_s
         false
       end
 
